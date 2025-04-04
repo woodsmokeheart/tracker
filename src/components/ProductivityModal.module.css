@@ -1,0 +1,165 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: calc(100vh - 2rem);
+  position: relative;
+  color: var(--text-color);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modalContent::-webkit-scrollbar {
+  display: none;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--text-color);
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.closeButton:hover {
+  opacity: 1;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.75rem;
+  text-align: center;
+  padding-right: 2rem;
+}
+
+.timeRangeButtons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.rangeButton {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  box-shadow: var(--button-shadow);
+}
+
+.rangeButton:hover {
+  background-color: var(--hover-color);
+}
+
+.rangeButton.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background-color: var(--nav-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.statCard h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.statNumber {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.chartContainer {
+  background-color: var(--nav-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chartPlaceholder {
+  font-size: 4rem;
+  color: var(--primary-color);
+  opacity: 0.2;
+}
+
+.chartText {
+  text-align: center;
+  margin: 0;
+  opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: 0.5rem;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+
+  .timeRangeButtons {
+    flex-direction: column;
+  }
+
+  .statsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .statCard {
+    padding: 1rem;
+  }
+
+  .chartContainer {
+    padding: 1.5rem;
+  }
+} 
