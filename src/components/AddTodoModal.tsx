@@ -25,11 +25,10 @@ const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) =
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
+    <div className={styles.modalOverlay} onClick={(e) => {
+      if (e.target === e.currentTarget) onClose();
+    }}>
       <div className={styles.modalContent}>
-        <button className={styles.closeButton} onClick={onClose}>
-          <FaTimes />
-        </button>
         <form className={styles.form} onSubmit={handleSubmit}>
           <input
             type="text"

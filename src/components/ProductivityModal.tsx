@@ -1,102 +1,110 @@
-import React, { useState } from 'react';
-import { FaTimes, FaChartLine, FaCalendarDay, FaCalendarWeek, FaCalendarAlt } from 'react-icons/fa';
+import React from 'react';
+import { FaTimes } from 'react-icons/fa';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 import styles from './ProductivityModal.module.css';
-
-interface ProductivityData {
-  date: string;
-  completed: number;
-}
 
 interface ProductivityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  data: ProductivityData[];
+  data: Array<{
+    date: string;
+    completed: number;
+  }>;
 }
 
-type TimeRange = 'day' | 'week' | 'month';
-
-const ProductivityModal: React.FC<ProductivityModalProps> = ({ isOpen, onClose, data }) => {
-  const [timeRange, setTimeRange] = useState<TimeRange>('day');
-
+const ProductivityModal: React.FC<ProductivityModalProps> = ({
+  isOpen,
+  onClose,
+  data
+}) => {
   if (!isOpen) return null;
 
-  const getFilteredData = () => {
-    const now = new Date();
-    const startDate = new Date();
-
-    switch (timeRange) {
-      case 'day':
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'week':
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-    }
-
-    return data.filter(item => new Date(item.date) >= startDate);
+  const processData = () => {
+    if (!data) return [];
+    
+    return data.map(item => ({
+      date: new Date(item.date).toLocaleDateString(),
+      tasks: item.completed
+    }));
   };
 
-  const getStats = () => {
-    const filteredData = getFilteredData();
-    const total = filteredData.reduce((sum, item) => sum + item.completed, 0);
-    const average = filteredData.length ? (total / filteredData.length).toFixed(1) : '0';
-
-    return {
-      total,
-      average,
-    };
-  };
-
-  const stats = getStats();
+  const chartData = processData();
 
   return (
-    <div className={styles.modalOverlay}>
+    <div className={styles.modalOverlay} onClick={(e) => {
+      if (e.target === e.currentTarget) onClose();
+    }}>
       <div className={styles.modalContent}>
-        <button className={styles.closeButton} onClick={onClose}>
-          <FaTimes />
-        </button>
-        <h2 className={styles.title}>Productivity Stats</h2>
-        
-        <div className={styles.timeRangeButtons}>
-          <button
-            className={`${styles.rangeButton} ${timeRange === 'day' ? styles.active : ''}`}
-            onClick={() => setTimeRange('day')}
-          >
-            <FaCalendarDay /> Day
-          </button>
-          <button
-            className={`${styles.rangeButton} ${timeRange === 'week' ? styles.active : ''}`}
-            onClick={() => setTimeRange('week')}
-          >
-            <FaCalendarWeek /> Week
-          </button>
-          <button
-            className={`${styles.rangeButton} ${timeRange === 'month' ? styles.active : ''}`}
-            onClick={() => setTimeRange('month')}
-          >
-            <FaCalendarAlt /> Month
-          </button>
-        </div>
-
-        <div className={styles.statsContainer}>
-          <div className={styles.statCard}>
-            <h3>Completed Tasks</h3>
-            <p className={styles.statNumber}>{stats.total}</p>
-          </div>
-          <div className={styles.statCard}>
-            <h3>Daily Average</h3>
-            <p className={styles.statNumber}>{stats.average}</p>
-          </div>
-        </div>
-
+        <h2 className={styles.modalTitle}>Productivity Stats</h2>
         <div className={styles.chartContainer}>
-          <FaChartLine className={styles.chartPlaceholder} />
-          <p className={styles.chartText}>
-            You've completed {stats.total} tasks in this {timeRange}
-          </p>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart 
+              data={chartData} 
+              margin={{ 
+                top: 20, 
+                right: 15, 
+                left: 0, 
+                bottom: 20 
+              }}
+            >
+              <defs>
+                <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                vertical={false}
+                stroke="var(--border-color)"
+                strokeOpacity={0.5}
+              />
+              <XAxis 
+                dataKey="date" 
+                stroke="var(--text-color)"
+                tick={{ fill: 'var(--text-color)' }}
+                axisLine={{ stroke: 'var(--border-color)' }}
+                tickMargin={10}
+                dy={10}
+              />
+              <YAxis 
+                stroke="var(--text-color)"
+                tick={{ fill: 'var(--text-color)' }}
+                axisLine={{ stroke: 'var(--border-color)' }}
+                tickCount={5}
+                allowDecimals={false}
+                tickMargin={5}
+                width={30}
+                fontSize={12}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'var(--nav-bg)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  color: 'var(--text-color)'
+                }}
+                labelStyle={{ color: 'var(--text-color)' }}
+              />
+              <Line
+                type="monotone"
+                dataKey="tasks"
+                stroke="var(--primary-color)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 6, fill: 'var(--primary-color)' }}
+                fill="url(#colorTasks)"
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
