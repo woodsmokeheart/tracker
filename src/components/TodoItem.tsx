@@ -65,7 +65,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
     );
   }
 
-  const shouldShowExpandButton = title.length > 50 || (description && description.length > 100);
+  const shouldShowExpandButton = description && description.length > 0;
 
   return (
     <div className={`${styles.itemContainer} ${isExpanded ? styles.expanded : ''}`}>

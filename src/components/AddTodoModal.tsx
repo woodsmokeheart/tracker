@@ -42,6 +42,7 @@ const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) =
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Task description (optional)"
+            style={{ whiteSpace: 'pre-wrap' }}
           />
           <button type="submit" className={styles.submitButton}>
             Add Task
