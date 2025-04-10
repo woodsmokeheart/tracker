@@ -156,7 +156,10 @@
   margin: 0 auto;
 }
 
-.themeToggle {
+.themeToggle,
+.statsButton,
+.settingsButton,
+.signOutButton {
   width: 40px;
   height: 40px;
   display: flex;
@@ -167,6 +170,21 @@
   color: var(--text-color);
   border-radius: 12px;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.themeToggle:hover,
+.statsButton:hover,
+.settingsButton:hover,
+.signOutButton:hover {
+  background: var(--card-bg);
+}
+
+.themeToggle:active,
+.statsButton:active,
+.settingsButton:active,
+.signOutButton:active {
+  transform: translateY(1px);
 }
 
 .settingsContainer {
@@ -201,33 +219,6 @@
   max-width: 500px;
   position: relative;
   z-index: 1001;
-}
-
-.statsButton,
-.settingsButton {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: var(--hover-color);
-  color: var(--text-color);
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.statsButton:hover,
-.settingsButton:hover {
-  background-color: var(--card-bg);
-}
-
-.statsButton:active {
-  transform: translateY(0);
-}
-
-.settingsButton:active {
-  transform: translateY(0);
 }
 
 @media (max-width: 768px) {

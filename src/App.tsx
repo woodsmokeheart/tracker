@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   FaPlus,
   FaSun,
@@ -7,6 +7,7 @@ import {
   FaCog,
   FaChartLine,
   FaClipboardList,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import { Toaster, toast } from 'react-hot-toast';
 import TodoItem from "./components/TodoItem";
@@ -14,6 +15,9 @@ import AddTodoModal from "./components/AddTodoModal";
 import ProductivityModal from "./components/ProductivityModal";
 import SettingsPopup from "./components/SettingsPopup";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import AuthComponent from "./components/Auth";
+import { useAuth } from "./context/AuthContext";
+import { supabase } from "./lib/supabase";
 import styles from "./App.module.css";
 
 interface Todo {
@@ -22,11 +26,13 @@ interface Todo {
   description: string;
   completed: boolean;
   createdAt: string;
+  user_id: string;
 }
 
-interface ProductivityData {
+export interface ProductivityData {
   date: string;
   completed: number;
+  user_id: string;
 }
 
 const ThemeToggle: React.FC = () => {
@@ -57,122 +63,157 @@ const ThemeToggle: React.FC = () => {
 };
 
 const AppContent: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[]>(() => {
-    const savedTodos = localStorage.getItem("todos");
-    return savedTodos ? JSON.parse(savedTodos) : [];
-  });
-
-  const [productivityData, setProductivityData] = useState<ProductivityData[]>(
-    () => {
-      const savedData = localStorage.getItem("productivityData");
-      return savedData ? JSON.parse(savedData) : [];
-    }
-  );
-
+  const { session, signOut } = useAuth();
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [productivityData, setProductivityData] = useState<ProductivityData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductivityOpen, setIsProductivityOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [filter, setFilter] = useState<"active" | "completed">("active");
 
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
+    if (session) {
+      fetchTodos();
+      fetchProductivityData();
+    }
+  }, [session]);
 
-  useEffect(() => {
-    localStorage.setItem("productivityData", JSON.stringify(productivityData));
-  }, [productivityData]);
+  const fetchTodos = async () => {
+    if (!session) return;
 
-  const updateProductivityData = (completed: boolean) => {
+    const { data, error } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      toast.error('Error fetching todos');
+      return;
+    }
+    setTodos(data || []);
+  };
+
+  const fetchProductivityData = async () => {
+    if (!session) return;
+
+    const { data, error } = await supabase
+      .from('productivity')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('date', { ascending: false });
+
+    if (error) {
+      toast.error('Error fetching productivity data');
+      return;
+    }
+    setProductivityData(data || []);
+  };
+
+  const updateProductivityData = async (completed: boolean) => {
+    if (!session) return;
+
     const today = new Date().toISOString().split("T")[0];
     const existingData = productivityData.find((item) => item.date === today);
 
     if (existingData) {
-      setProductivityData(
-        productivityData.map((item) =>
-          item.date === today
-            ? { ...item, completed: item.completed + (completed ? 1 : -1) }
-            : item
-        )
-      );
+      const { error } = await supabase
+        .from('productivity')
+        .update({ completed: existingData.completed + (completed ? 1 : -1) })
+        .eq('date', today)
+        .eq('user_id', session.user.id);
+
+      if (error) {
+        toast.error('Error updating productivity data');
+        return;
+      }
     } else {
-      setProductivityData([...productivityData, { date: today, completed: 1 }]);
+      const { error } = await supabase
+        .from('productivity')
+        .insert([{ date: today, completed: 1, user_id: session.user.id }]);
+
+      if (error) {
+        toast.error('Error creating productivity data');
+        return;
+      }
     }
+
+    fetchProductivityData();
   };
 
-  const addTodo = (title: string, description: string) => {
-    const newTodo: Todo = {
-      id: Date.now().toString(),
+  const addTodo = async (title: string, description: string) => {
+    if (!session) return;
+
+    const newTodo = {
       title,
       description,
       completed: false,
       createdAt: new Date().toISOString(),
+      user_id: session.user.id,
     };
-    setTodos([...todos, newTodo]);
-    toast.success('Task created successfully!', {
-      style: {
-        background: 'var(--card-bg)',
-        color: 'var(--text-color)',
-        border: '1px solid var(--border-color)',
-      },
-      iconTheme: {
-        primary: 'var(--primary-color)',
-        secondary: 'white',
-      },
-    });
-  };
 
-  const toggleTodo = (id: string) => {
-    setTodos(
-      todos.map((todo) => {
-        if (todo.id === id) {
-          const newCompleted = !todo.completed;
-          updateProductivityData(newCompleted);
-          toast.success(
-            newCompleted ? 'Task completed!' : 'Task marked as active!',
-            {
-              style: {
-                background: 'var(--card-bg)',
-                color: 'var(--text-color)',
-                border: '1px solid var(--border-color)',
-              },
-              iconTheme: {
-                primary: 'var(--primary-color)',
-                secondary: 'white',
-              },
-            }
-          );
-          return { ...todo, completed: newCompleted };
-        }
-        return todo;
-      })
-    );
-  };
+    const { error } = await supabase.from('todos').insert([newTodo]);
 
-  const deleteTodo = (id: string) => {
-    const todoToDelete = todos.find(todo => todo.id === id);
-    if (todoToDelete) {
-      setTodos(todos.filter((todo) => todo.id !== id));
-      toast.success('Task deleted successfully!', {
-        style: {
-          background: 'var(--card-bg)',
-          color: 'var(--text-color)',
-          border: '1px solid var(--border-color)',
-        },
-        iconTheme: {
-          primary: '#f44336',
-          secondary: 'white',
-        },
-      });
+    if (error) {
+      toast.error('Error creating todo');
+      return;
     }
+
+    fetchTodos();
+    toast.success('Task created successfully!');
   };
 
-  const editTodo = (id: string, title: string, description: string) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, title, description } : todo
-      )
-    );
+  const toggleTodo = async (id: string) => {
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+
+    const { error } = await supabase
+      .from('todos')
+      .update({ completed: !todo.completed })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Error updating todo');
+      return;
+    }
+
+    updateProductivityData(!todo.completed);
+    fetchTodos();
+    toast.success(todo.completed ? 'Task marked as active!' : 'Task completed!');
   };
+
+  const deleteTodo = async (id: string) => {
+    const { error } = await supabase
+      .from('todos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Error deleting todo');
+      return;
+    }
+
+    fetchTodos();
+    toast.success('Task deleted successfully!');
+  };
+
+  const editTodo = async (id: string, title: string, description: string) => {
+    const { error } = await supabase
+      .from('todos')
+      .update({ title, description })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Error updating todo');
+      return;
+    }
+
+    fetchTodos();
+  };
+
+  if (!session) {
+    return <AuthComponent />;
+  }
 
   const filteredTodos = todos.filter((todo) => {
     if (filter === "active") return !todo.completed;
@@ -188,23 +229,6 @@ const AppContent: React.FC = () => {
       case "completed":
         return todos.filter((todo) => todo.completed).length;
     }
-  };
-
-  const handleClearData = () => {
-    localStorage.clear();
-    setTodos([]);
-    setProductivityData([]);
-    toast.success('All data cleared successfully!', {
-      style: {
-        background: 'var(--card-bg)',
-        color: 'var(--text-color)',
-        border: '1px solid var(--border-color)',
-      },
-      iconTheme: {
-        primary: '#f44336',
-        secondary: 'white',
-      },
-    });
   };
 
   return (
@@ -228,6 +252,13 @@ const AppContent: React.FC = () => {
             <FaCog />
           </button>
           <ThemeToggle />
+          <button
+            className={styles.signOutButton}
+            onClick={signOut}
+            title="Sign Out"
+          >
+            <FaSignOutAlt />
+          </button>
         </div>
       </header>
 
@@ -293,7 +324,7 @@ const AppContent: React.FC = () => {
       <SettingsPopup
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        onClearData={handleClearData}
+        onClearData={() => {}}
       />
     </div>
   );
