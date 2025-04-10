@@ -1,11 +1,13 @@
 .authContainer {
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+  margin: 50vh auto 0;
   padding: 2rem;
   background: var(--card-bg);
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-50%);
+  position: relative;
 }
 
 .title {
@@ -147,8 +149,9 @@
 
 @media (max-width: 480px) {
   .authContainer {
-    margin: 1rem;
+    margin: 50vh 1rem 0;
     padding: 1.5rem;
+    width: calc(100% - 2rem);
   }
 
   .title {
