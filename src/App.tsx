@@ -4,7 +4,6 @@ import {
   FaSun,
   FaMoon,
   FaDesktop,
-  FaCog,
   FaChartLine,
   FaClipboardList,
   FaSignOutAlt,
@@ -13,7 +12,6 @@ import { Toaster, toast } from 'react-hot-toast';
 import TodoItem from "./components/TodoItem";
 import AddTodoModal from "./components/AddTodoModal";
 import ProductivityModal from "./components/ProductivityModal";
-import SettingsPopup from "./components/SettingsPopup";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import AuthComponent from "./components/Auth";
 import { useAuth } from "./context/AuthContext";
@@ -68,7 +66,6 @@ const AppContent: React.FC = () => {
   const [productivityData, setProductivityData] = useState<ProductivityData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductivityOpen, setIsProductivityOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [filter, setFilter] = useState<"active" | "completed">("active");
 
   useEffect(() => {
@@ -244,13 +241,6 @@ const AppContent: React.FC = () => {
           >
             <FaChartLine />
           </button>
-          <button
-            className={styles.settingsButton}
-            onClick={() => setIsSettingsOpen(true)}
-            title="Settings"
-          >
-            <FaCog />
-          </button>
           <ThemeToggle />
           <button
             className={styles.signOutButton}
@@ -319,12 +309,6 @@ const AppContent: React.FC = () => {
         isOpen={isProductivityOpen}
         onClose={() => setIsProductivityOpen(false)}
         data={productivityData}
-      />
-
-      <SettingsPopup
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onClearData={() => {}}
       />
     </div>
   );

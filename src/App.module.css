@@ -158,7 +158,6 @@
 
 .themeToggle,
 .statsButton,
-.settingsButton,
 .signOutButton {
   width: 40px;
   height: 40px;
@@ -175,14 +174,12 @@
 
 .themeToggle:hover,
 .statsButton:hover,
-.settingsButton:hover,
 .signOutButton:hover {
   background: var(--card-bg);
 }
 
 .themeToggle:active,
 .statsButton:active,
-.settingsButton:active,
 .signOutButton:active {
   transform: translateY(1px);
 }
