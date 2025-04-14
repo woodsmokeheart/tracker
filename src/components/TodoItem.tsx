@@ -7,9 +7,10 @@ interface TodoItemProps {
   title: string;
   description: string;
   completed: boolean;
+  imageUrl?: string;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
-  onEdit: (id: string, title: string, description: string) => void;
+  onEdit: (id: string, title: string, description: string, imageUrl?: string) => void;
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({
@@ -17,6 +18,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   title,
   description,
   completed,
+  imageUrl,
   onToggle,
   onDelete,
   onEdit,
@@ -25,11 +27,15 @@ const TodoItem: React.FC<TodoItemProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editDescription, setEditDescription] = useState(description);
+  const [editImageUrl, setEditImageUrl] = useState(imageUrl);
+
+  // Check if we need to show expand button
+  const hasExpandableContent = description || imageUrl;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editTitle.trim()) {
-      onEdit(id, editTitle, editDescription);
+      onEdit(id, editTitle, editDescription, editImageUrl);
       setIsEditing(false);
     }
   };
@@ -52,6 +58,27 @@ const TodoItem: React.FC<TodoItemProps> = ({
             onChange={(e) => setEditDescription(e.target.value)}
             placeholder="Task description (optional)"
           />
+          {editImageUrl && (
+            <div className={styles.imageContainer}>
+              <img 
+                src={editImageUrl} 
+                alt="Task" 
+                className={styles.image}
+                onError={(e) => {
+                  console.error('Failed to load edit image:', editImageUrl);
+                  const img = e.currentTarget as HTMLImageElement;
+                  img.style.display = 'none';
+                }}
+              />
+              <button
+                type="button"
+                className={styles.removeImage}
+                onClick={() => setEditImageUrl(undefined)}
+              >
+                <FaTrash />
+              </button>
+            </div>
+          )}
           <div className={styles.buttonContainer}>
             <button type="submit" className={styles.button}>
               <FaCheck color="#4CAF50" />
@@ -65,18 +92,36 @@ const TodoItem: React.FC<TodoItemProps> = ({
     );
   }
 
-  const shouldShowExpandButton = description && description.length > 0;
-
   return (
     <div className={`${styles.itemContainer} ${isExpanded ? styles.expanded : ''}`}>
       <h3 className={`${styles.title} ${completed ? styles.titleCompleted : ''}`}>
         {title}
       </h3>
-      {description && (
-        <p className={`${styles.description} ${completed ? styles.descriptionCompleted : ''}`}>
-          {description}
-        </p>
+      
+      {isExpanded && (
+        <div className={styles.content}>
+          {imageUrl && (
+            <div className={styles.imageContainer}>
+              <img 
+                src={imageUrl}
+                alt="Task" 
+                className={styles.image}
+                onError={(e) => {
+                  console.error('Failed to load image:', imageUrl);
+                  const img = e.currentTarget as HTMLImageElement;
+                  img.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+          {description && (
+            <p className={`${styles.description} ${completed ? styles.descriptionCompleted : ''}`}>
+              {description}
+            </p>
+          )}
+        </div>
       )}
+
       <div className={styles.buttonContainer}>
         <button className={styles.button} onClick={() => onToggle(id)}>
           <FaCheck color={completed ? "#4CAF50" : "#888"} />
@@ -87,7 +132,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
         <button className={styles.button} onClick={() => onDelete(id)}>
           <FaTrash color="#f44336" />
         </button>
-        {shouldShowExpandButton && (
+        {hasExpandableContent && (
           <button 
             className={styles.expandButton} 
             onClick={() => setIsExpanded(!isExpanded)}

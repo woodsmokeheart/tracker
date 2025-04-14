@@ -25,6 +25,7 @@ interface Todo {
   completed: boolean;
   createdAt: string;
   user_id: string;
+  image_url?: string;
 }
 
 export interface ProductivityData {
@@ -138,7 +139,7 @@ const AppContent: React.FC = () => {
     fetchProductivityData();
   };
 
-  const addTodo = async (title: string, description: string) => {
+  const addTodo = async (title: string, description: string, imageUrl?: string) => {
     if (!session) return;
 
     const newTodo = {
@@ -147,6 +148,7 @@ const AppContent: React.FC = () => {
       completed: false,
       createdAt: new Date().toISOString(),
       user_id: session.user.id,
+      image_url: imageUrl
     };
 
     const { error } = await supabase.from('todos').insert([newTodo]);
@@ -194,10 +196,10 @@ const AppContent: React.FC = () => {
     toast.success('Task deleted successfully!');
   };
 
-  const editTodo = async (id: string, title: string, description: string) => {
+  const editTodo = async (id: string, title: string, description: string, imageUrl?: string) => {
     const { error } = await supabase
       .from('todos')
-      .update({ title, description })
+      .update({ title, description, image_url: imageUrl })
       .eq('id', id);
 
     if (error) {
@@ -287,6 +289,7 @@ const AppContent: React.FC = () => {
               title={todo.title}
               description={todo.description}
               completed={todo.completed}
+              imageUrl={todo.image_url}
               onToggle={toggleTodo}
               onDelete={deleteTodo}
               onEdit={editTodo}

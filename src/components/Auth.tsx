@@ -30,6 +30,7 @@ export default function AuthComponent() {
         supabaseClient={supabase}
         view={activeTab}
         providers={[]}
+        redirectTo={window.location.origin}
         appearance={{
           theme: ThemeSupa,
           style: {
