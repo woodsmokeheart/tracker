@@ -14,6 +14,57 @@ interface AddTodoModalProps {
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_IMAGE_DIMENSIONS = { width: 3000, height: 3000 };
+const COMPRESSION_QUALITY = 0.7; // Качество сжатия (0.1 - 1.0)
+
+const compressImage = (file: File): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Масштабируем изображение, если оно больше максимальных размеров
+        if (width > MAX_IMAGE_DIMENSIONS.width) {
+          height = (MAX_IMAGE_DIMENSIONS.width * height) / width;
+          width = MAX_IMAGE_DIMENSIONS.width;
+        }
+        if (height > MAX_IMAGE_DIMENSIONS.height) {
+          width = (MAX_IMAGE_DIMENSIONS.height * width) / height;
+          height = MAX_IMAGE_DIMENSIONS.height;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Конвертируем в нужный формат с заданным качеством
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Canvas to Blob conversion failed'));
+            }
+          },
+          file.type,
+          COMPRESSION_QUALITY
+        );
+      };
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+    };
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+  });
+};
 
 const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) => {
   const { session } = useAuth();
@@ -39,21 +90,22 @@ const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) =
       return;
     }
 
-    // Create image preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const img = new Image();
-      img.onload = () => {
-        if (img.width > MAX_IMAGE_DIMENSIONS.width || img.height > MAX_IMAGE_DIMENSIONS.height) {
-          toast.error(`Image dimensions should not exceed ${MAX_IMAGE_DIMENSIONS.width}x${MAX_IMAGE_DIMENSIONS.height}px`);
-          return;
-        }
-        setImagePreview(reader.result as string);
-      };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-    setImage(file);
+    try {
+      // Сжимаем изображение перед предпросмотром
+      const compressedBlob = await compressImage(file);
+      const compressedFile = new File([compressedBlob], file.name, { type: file.type });
+      
+      // Создаем URL для предпросмотра сжатого изображения
+      const previewUrl = URL.createObjectURL(compressedFile);
+      setImagePreview(previewUrl);
+      setImage(compressedFile);
+      
+      // Очищаем URL после установки предпросмотра
+      return () => URL.revokeObjectURL(previewUrl);
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      toast.error('Failed to process image');
+    }
   };
 
   const removeImage = () => {
@@ -79,14 +131,10 @@ const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) =
 
         if (error) throw error;
 
-        // Get the public URL using the correct method
         const { data: { publicUrl } } = supabase.storage
           .from('todo-images')
           .getPublicUrl(fileName);
 
-        console.log('Generated public URL:', publicUrl);
-        
-        // Store the complete URL
         imageUrl = publicUrl;
       } catch (error) {
         console.error('Upload error:', error);
