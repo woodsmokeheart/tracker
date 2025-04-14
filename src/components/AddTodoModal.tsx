@@ -11,9 +11,9 @@ interface AddTodoModalProps {
   onAdd: (title: string, description: string, imageUrl?: string) => void;
 }
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_IMAGE_DIMENSIONS = { width: 1200, height: 1200 };
+const MAX_IMAGE_DIMENSIONS = { width: 3000, height: 3000 };
 
 const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) => {
   const { session } = useAuth();
@@ -35,7 +35,7 @@ const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) =
 
     // Check file size
     if (file.size > MAX_IMAGE_SIZE) {
-      toast.error('Image size should be less than 2MB');
+      toast.error('Image size should be less than 10MB');
       return;
     }
 
@@ -141,7 +141,7 @@ const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) =
           <div className={styles.imageUpload}>
             <label className={styles.imageLabel}>
               <FaImage />
-              <span>Add Image (max 2MB, 1200x1200px)</span>
+              <span>Add Image (max 10MB, 3000x3000px)</span>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
