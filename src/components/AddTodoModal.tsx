@@ -73,7 +73,7 @@ const AddTodoModal: React.FC<AddTodoModalProps> = ({ isOpen, onClose, onAdd }) =
         const fileExt = image.name.split('.').pop();
         const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
         
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from('todo-images')
           .upload(fileName, image);
 
