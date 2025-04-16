@@ -77,10 +77,11 @@ const AppContent: React.FC = () => {
   }, [session]);
 
   useEffect(() => {
-    // Check if we're on the wrong port and have auth parameters
-    if (window.location.port === '3000' && window.location.hash.includes('access_token')) {
-      // Redirect to the correct port while preserving the hash
-      window.location.href = `${window.location.protocol}//${window.location.hostname}:5173${window.location.hash}`;
+    // Handle redirect in production
+    if (window.location.hostname === 'localhost' && window.location.port === '3000' && window.location.hash) {
+      window.location.href = `${window.location.protocol}//${window.location.hostname}:5173${window.location.pathname}${window.location.hash}`;
+    } else if (window.location.hostname.includes('vercel.app') && window.location.port === '3000') {
+      window.location.href = `https://tracker-theta-woad.vercel.app${window.location.pathname}${window.location.hash}`;
     }
   }, []);
 
@@ -326,6 +327,15 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Handle redirect in production
+    if (window.location.hostname === 'localhost' && window.location.port === '3000' && window.location.hash) {
+      window.location.href = `${window.location.protocol}//${window.location.hostname}:5173${window.location.pathname}${window.location.hash}`;
+    } else if (window.location.hostname.includes('vercel.app') && window.location.port === '3000') {
+      window.location.href = `https://tracker-theta-woad.vercel.app${window.location.pathname}${window.location.hash}`;
+    }
+  }, []);
+
   return (
     <ThemeProvider>
       <AppContent />
