@@ -4,14 +4,14 @@ import ViewTodoModal from './ViewTodoModal';
 import styles from './TodoItem.module.css';
 
 interface TodoItemProps {
-  id: number;
+  id: string;
   title: string;
   description: string;
   completed: boolean;
   imageUrl?: string;
-  onToggle: (id: number, completed: boolean) => void;
-  onDelete: (id: number) => void;
-  onEdit: (id: number, title: string, description: string, imageUrl?: string) => void;
+  onToggle: (id: string, completed: boolean) => void;
+  onDelete: (id: string) => void;
+  onEdit: (id: string, title: string, description: string, imageUrl?: string) => void;
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({
