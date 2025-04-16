@@ -44,9 +44,7 @@ export default function AuthComponent() {
         supabaseClient={supabase}
         view={activeTab}
         providers={[]}
-        redirectTo={window.location.hostname.includes('vercel.app') 
-          ? 'https://tracker-theta-woad.vercel.app' 
-          : `${window.location.protocol}//${window.location.hostname}:5173`}
+        redirectTo={`${window.location.origin}${window.location.pathname}`}
         appearance={{
           theme: ThemeSupa,
           style: {

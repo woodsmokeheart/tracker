@@ -77,11 +77,17 @@ const AppContent: React.FC = () => {
   }, [session]);
 
   useEffect(() => {
-    // Handle redirect in production
-    if (window.location.hostname === 'localhost' && window.location.port === '3000' && window.location.hash) {
-      window.location.href = `${window.location.protocol}//${window.location.hostname}:5173${window.location.pathname}${window.location.hash}`;
-    } else if (window.location.hostname.includes('vercel.app') && window.location.port === '3000') {
-      window.location.href = `https://tracker-theta-woad.vercel.app${window.location.pathname}${window.location.hash}`;
+    // Handle authentication redirect and hash parameters
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      // If we have an access token, ensure we're on the correct origin
+      const targetOrigin = window.location.hostname.includes('vercel.app')
+        ? 'https://tracker-theta-woad.vercel.app'
+        : `${window.location.protocol}//${window.location.hostname}:5173`;
+        
+      if (window.location.origin !== targetOrigin) {
+        window.location.href = `${targetOrigin}${window.location.pathname}${hash}`;
+      }
     }
   }, []);
 
@@ -328,11 +334,17 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   useEffect(() => {
-    // Handle redirect in production
-    if (window.location.hostname === 'localhost' && window.location.port === '3000' && window.location.hash) {
-      window.location.href = `${window.location.protocol}//${window.location.hostname}:5173${window.location.pathname}${window.location.hash}`;
-    } else if (window.location.hostname.includes('vercel.app') && window.location.port === '3000') {
-      window.location.href = `https://tracker-theta-woad.vercel.app${window.location.pathname}${window.location.hash}`;
+    // Handle authentication redirect and hash parameters
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      // If we have an access token, ensure we're on the correct origin
+      const targetOrigin = window.location.hostname.includes('vercel.app')
+        ? 'https://tracker-theta-woad.vercel.app'
+        : `${window.location.protocol}//${window.location.hostname}:5173`;
+        
+      if (window.location.origin !== targetOrigin) {
+        window.location.href = `${targetOrigin}${window.location.pathname}${hash}`;
+      }
     }
   }, []);
 
