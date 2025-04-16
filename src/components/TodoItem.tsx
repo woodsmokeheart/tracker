@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaCheck, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheck } from 'react-icons/fa';
+import ViewTodoModal from './ViewTodoModal';
 import styles from './TodoItem.module.css';
 
 interface TodoItemProps {
-  id: string;
+  id: number;
   title: string;
   description: string;
   completed: boolean;
   imageUrl?: string;
-  onToggle: (id: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (id: string, title: string, description: string, imageUrl?: string) => void;
+  onToggle: (id: number, completed: boolean) => void;
+  onDelete: (id: number) => void;
+  onEdit: (id: number, title: string, description: string, imageUrl?: string) => void;
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({
@@ -24,13 +25,10 @@ const TodoItem: React.FC<TodoItemProps> = ({
   onEdit,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editDescription, setEditDescription] = useState(description);
   const [editImageUrl, setEditImageUrl] = useState(imageUrl);
-
-  // Check if we need to show expand button
-  const hasExpandableContent = description || imageUrl;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +36,14 @@ const TodoItem: React.FC<TodoItemProps> = ({
       onEdit(id, editTitle, editDescription, editImageUrl);
       setIsEditing(false);
     }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(`.${styles.buttonContainer}`)) {
+      return;
+    }
+    setIsViewModalOpen(true);
   };
 
   if (isEditing) {
@@ -93,56 +99,61 @@ const TodoItem: React.FC<TodoItemProps> = ({
   }
 
   return (
-    <div className={`${styles.itemContainer} ${isExpanded ? styles.expanded : ''}`}>
-      <h3 className={`${styles.title} ${completed ? styles.titleCompleted : ''}`}>
-        {title}
-      </h3>
-      
-      {isExpanded && (
+    <>
+      <div 
+        className={styles.itemContainer}
+        onClick={handleCardClick}
+      >
         <div className={styles.content}>
-          {imageUrl && (
-            <div className={styles.imageContainer}>
-              <img 
-                src={imageUrl}
-                alt="Task" 
-                className={styles.image}
-                onError={(e) => {
-                  console.error('Failed to load image:', imageUrl);
-                  const img = e.currentTarget as HTMLImageElement;
-                  img.style.display = 'none';
-                }}
-              />
-            </div>
-          )}
-          {description && (
-            <p className={`${styles.description} ${completed ? styles.descriptionCompleted : ''}`}>
-              {description}
-            </p>
-          )}
-        </div>
-      )}
+          <div className={styles.textContent}>
+            <h3 className={`${styles.title} ${completed ? styles.titleCompleted : ''}`}>
+              {title}
+            </h3>
+            {description && (
+              <p className={styles.description}>{description}</p>
+            )}
+          </div>
 
-      <div className={styles.buttonContainer}>
-        <button className={styles.button} onClick={() => onToggle(id)}>
-          <FaCheck color={completed ? "#4CAF50" : "#888"} />
-        </button>
-        <button className={styles.button} onClick={() => setIsEditing(true)}>
-          <FaEdit color="#2196F3" />
-        </button>
-        <button className={styles.button} onClick={() => onDelete(id)}>
-          <FaTrash color="#f44336" />
-        </button>
-        {hasExpandableContent && (
-          <button 
-            className={styles.expandButton} 
-            onClick={() => setIsExpanded(!isExpanded)}
-            title={isExpanded ? "Collapse" : "Expand"}
-          >
-            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
-          </button>
+          <div className={styles.buttonContainer}>
+            <button className={styles.button} onClick={() => onToggle(id, !completed)}>
+              <FaCheck color={completed ? "#4CAF50" : "#888"} />
+            </button>
+            <button className={styles.button} onClick={() => setIsEditing(true)}>
+              <FaEdit color="#2196F3" />
+            </button>
+            <button className={styles.button} onClick={() => onDelete(id)}>
+              <FaTrash color="#f44336" />
+            </button>
+          </div>
+        </div>
+
+        {imageUrl && (
+          <div className={styles.imageContainer}>
+            <img 
+              src={imageUrl} 
+              alt="Task" 
+              className={styles.image}
+              onError={(e) => {
+                console.error('Failed to load image:', imageUrl);
+                const img = e.currentTarget as HTMLImageElement;
+                img.style.display = 'none';
+              }}
+            />
+          </div>
         )}
       </div>
-    </div>
+
+      <ViewTodoModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        todo={{
+          title,
+          description,
+          completed,
+          imageUrl
+        }}
+      />
+    </>
   );
 };
 
