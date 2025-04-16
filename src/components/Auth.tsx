@@ -2,10 +2,24 @@ import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabase'
 import styles from './Auth.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 
 export default function AuthComponent() {
   const [activeTab, setActiveTab] = useState<'sign_in' | 'sign_up'>('sign_in')
+
+  useEffect(() => {
+    // Check for error parameters in URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1))
+    const error = hashParams.get('error')
+    const errorDescription = hashParams.get('error_description')
+
+    if (error === 'access_denied' && errorDescription) {
+      toast.error(decodeURIComponent(errorDescription))
+      // Remove error parameters from URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
 
   return (
     <div className={styles.authContainer}>

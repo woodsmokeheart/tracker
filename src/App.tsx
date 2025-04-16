@@ -76,6 +76,14 @@ const AppContent: React.FC = () => {
     }
   }, [session]);
 
+  useEffect(() => {
+    // Check if we're on the wrong port and have auth parameters
+    if (window.location.port === '3000' && window.location.hash.includes('access_token')) {
+      // Redirect to the correct port while preserving the hash
+      window.location.href = `${window.location.protocol}//${window.location.hostname}:5173${window.location.hash}`;
+    }
+  }, []);
+
   const fetchTodos = async () => {
     if (!session) return;
 
