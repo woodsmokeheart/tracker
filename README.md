@@ -10,7 +10,6 @@ A modern, responsive task management application built with React and Supabase. 
 
 - **🔐 User Authentication**
   - Email/Password authentication
-  - Google Sign-in integration
   - Secure session management
 
 - **📋 Task Management**
@@ -76,7 +75,7 @@ A modern, responsive task management application built with React and Supabase. 
 ## 📱 Usage
 
 1. **Authentication**
-   - Sign up with email/password or Google
+   - Sign up with email and password
    - Verify your email address
    - Login to access your tasks
 
@@ -95,7 +94,7 @@ A modern, responsive task management application built with React and Supabase. 
 ### Supabase Setup
 
 1. Create a new project on [Supabase](https://supabase.com)
-2. Enable Email and Google authentication
+2. Enable Email authentication
 3. Set up the following tables:
    ```sql
    -- todos table
@@ -132,10 +131,6 @@ Required environment variables:
 - `VITE_SUPABASE_URL`: Your Supabase project URL
 - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -159,4 +154,4 @@ If you have any questions or need help, please open an issue in the repository.
 
 ---
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by M1
