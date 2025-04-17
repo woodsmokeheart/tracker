@@ -4,8 +4,6 @@ A modern, responsive task management application built with React and Supabase. 
 
 [Live Demo](https://tracker-theta-woad.vercel.app/)
 
-![Task Tracker Preview](public/preview.png)
-
 ## ✨ Features
 
 - **🔐 User Authentication**
