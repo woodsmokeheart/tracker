@@ -4,178 +4,131 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
 }
 
 .modalContent {
-  position: relative;
   background: var(--card-bg);
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 2rem;
 }
 
 .modalHeader {
-  position: relative;
-  background: var(--card-bg);
-  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
   border-bottom: 1px solid var(--border-color);
-  border-radius: 16px 16px 0 0;
-  padding: 0 1.5rem;
+  background: var(--card-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.modalBody {
-  padding: 2rem;
-  overflow-y: auto;
+.status {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  padding: 0.5rem 1rem;
+  background: var(--hover-color);
+  border-radius: 8px;
+}
+
+.status svg {
+  font-size: 1rem;
 }
 
 .closeButton {
-  position: absolute;
-  right: 1.5rem;
-  top: 50%;
-  transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--text-color);
-  font-size: 1.25rem;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .closeButton:hover {
   background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: -0.01em;
-  color: var(--text-color);
   margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.description {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .imageContainer {
   width: 100%;
-  max-height: 400px;
+  max-height: 300px;
   border-radius: 12px;
   overflow: hidden;
-  background: var(--hover-color);
 }
 
 .image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-}
-
-.description {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  letter-spacing: 0.01em;
-  color: var(--text-color);
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.status {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
-}
-
-@media (max-width: 768px) {
-  .title {
-    font-size: 1.5rem;
-    line-height: 1.35;
-  }
-
-  .description {
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-
-  .status {
-    font-size: 0.95rem;
-  }
+  object-fit: cover;
 }
 
 @media (max-width: 480px) {
   .modalContent {
     width: 95%;
-    max-height: 95vh;
+    padding-bottom: 1.5rem;
   }
 
-  .modalHeader {
-    height: 56px;
-    padding: 1rem;
-  }
-
-  .closeButton {
-    right: 1rem;
-    width: 28px;
-    height: 28px;
-    font-size: 1.1rem;
-  }
-
+  .modalHeader,
   .modalBody {
-    padding: 1.5rem;
-    gap: 1rem;
+    padding: 1rem;
   }
 
   .title {
     font-size: 1.25rem;
-    line-height: 1.3;
   }
 
   .description {
     font-size: 0.95rem;
-    line-height: 1.5;
-  }
-
-  .status {
-    font-size: 0.9rem;
-  }
-
-  .imageContainer {
-    max-height: 300px;
-  }
-}
-
-@media (max-width: 360px) {
-  .title {
-    font-size: 1.15rem;
-    line-height: 1.25;
-  }
-
-  .description {
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
-
-  .status {
-    font-size: 0.85rem;
   }
 } 

@@ -20,6 +20,10 @@ const ViewTodoModal: React.FC<ViewTodoModalProps> = ({ isOpen, onClose, todo }) 
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeader}>
+          <div className={styles.status}>
+            <FaCheck color={todo.completed ? "#4CAF50" : "#888"} />
+            <span>{todo.completed ? 'Completed' : 'Active'}</span>
+          </div>
           <button className={styles.closeButton} onClick={onClose}>
             <FaTimes />
           </button>
@@ -46,11 +50,6 @@ const ViewTodoModal: React.FC<ViewTodoModalProps> = ({ isOpen, onClose, todo }) 
           {todo.description && (
             <p className={styles.description}>{todo.description}</p>
           )}
-
-          <div className={styles.status}>
-            <FaCheck color={todo.completed ? "#4CAF50" : "#888"} />
-            {todo.completed ? 'Completed' : 'Active'}
-          </div>
         </div>
       </div>
     </div>
