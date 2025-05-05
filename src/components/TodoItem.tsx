@@ -121,7 +121,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
             <button className={styles.button} onClick={() => setIsEditing(true)}>
               <FaEdit color="#2196F3" />
             </button>
-            <button className={styles.button} onClick={() => onDelete(id)}>
+            <button className={`${styles.button} ${styles.deleteButton}`} onClick={() => onDelete(id)}>
               <FaTrash color="#f44336" />
             </button>
           </div>
