@@ -12,6 +12,7 @@ interface TodoItemProps {
   onToggle: (id: string, completed: boolean) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, title: string, description: string, imageUrl?: string) => void;
+  isDeleting: boolean;
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({
@@ -23,6 +24,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   onToggle,
   onDelete,
   onEdit,
+  isDeleting,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -89,7 +91,15 @@ const TodoItem: React.FC<TodoItemProps> = ({
             <button type="submit" className={styles.button}>
               <FaCheck color="#4CAF50" />
             </button>
-            <button type="button" className={styles.button} onClick={() => setIsEditing(false)}>
+            <button 
+              type="button" 
+              className={`${styles.button} ${styles.deleteButton}`}
+              onClick={() => {
+                setIsEditing(false);
+                onDelete(id);
+              }}
+              disabled={isDeleting}
+            >
               <FaTrash color="#f44336" />
             </button>
           </div>
@@ -105,12 +115,29 @@ const TodoItem: React.FC<TodoItemProps> = ({
         onClick={handleCardClick}
       >
         <div className={styles.content}>
-          <div className={styles.textContent}>
-            <h3 className={`${styles.title} ${completed ? styles.titleCompleted : ''}`}>
-              {title}
-            </h3>
-            {description && (
-              <p className={styles.description}>{description}</p>
+          <div className={styles.mainContent}>
+            <div className={styles.textContent}>
+              <h3 className={`${styles.title} ${completed ? styles.titleCompleted : ''}`}>
+                {title}
+              </h3>
+              {description && (
+                <p className={styles.description}>{description}</p>
+              )}
+            </div>
+
+            {imageUrl && (
+              <div className={styles.imageContainer}>
+                <img 
+                  src={imageUrl} 
+                  alt="Task" 
+                  className={styles.image}
+                  onError={(e) => {
+                    console.error('Failed to load image:', imageUrl);
+                    const img = e.currentTarget as HTMLImageElement;
+                    img.style.display = 'none';
+                  }}
+                />
+              </div>
             )}
           </div>
 
@@ -121,26 +148,15 @@ const TodoItem: React.FC<TodoItemProps> = ({
             <button className={styles.button} onClick={() => setIsEditing(true)}>
               <FaEdit color="#2196F3" />
             </button>
-            <button className={`${styles.button} ${styles.deleteButton}`} onClick={() => onDelete(id)}>
+            <button 
+              className={`${styles.button} ${styles.deleteButton}`}
+              onClick={() => onDelete(id)}
+              disabled={isDeleting}
+            >
               <FaTrash color="#f44336" />
             </button>
           </div>
         </div>
-
-        {imageUrl && (
-          <div className={styles.imageContainer}>
-            <img 
-              src={imageUrl} 
-              alt="Task" 
-              className={styles.image}
-              onError={(e) => {
-                console.error('Failed to load image:', imageUrl);
-                const img = e.currentTarget as HTMLImageElement;
-                img.style.display = 'none';
-              }}
-            />
-          </div>
-        )}
       </div>
 
       <ViewTodoModal

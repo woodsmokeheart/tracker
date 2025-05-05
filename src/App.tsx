@@ -12,6 +12,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import TodoItem from "./components/TodoItem";
 import AddTodoModal from "./components/AddTodoModal";
 import ProductivityModal from "./components/ProductivityModal";
+import UndoToast from "./components/UndoToast";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import AuthComponent from "./components/Auth";
 import { useAuth } from "./context/AuthContext";
@@ -26,6 +27,11 @@ interface Todo {
   createdAt: string;
   user_id: string;
   image_url?: string;
+}
+
+interface DeletedTodo {
+  todo: Todo;
+  timeoutId: number;
 }
 
 export interface ProductivityData {
@@ -68,6 +74,8 @@ const AppContent: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductivityOpen, setIsProductivityOpen] = useState(false);
   const [filter, setFilter] = useState<"active" | "completed">("active");
+  const [deletedTodo, setDeletedTodo] = useState<DeletedTodo | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -104,7 +112,13 @@ const AppContent: React.FC = () => {
       toast.error('Error fetching todos');
       return;
     }
-    setTodos(data || []);
+
+    // Фильтруем удаляемую задачу из полученных данных
+    const filteredData = data?.filter(todo => 
+      !deletedTodo || todo.id !== deletedTodo.todo.id
+    ) || [];
+
+    setTodos(filteredData);
   };
 
   const fetchProductivityData = async () => {
@@ -166,14 +180,23 @@ const AppContent: React.FC = () => {
       image_url: imageUrl
     };
 
-    const { error } = await supabase.from('todos').insert([newTodo]);
+    const { data, error } = await supabase.from('todos').insert([newTodo]).select();
 
     if (error) {
       toast.error('Error creating todo');
       return;
     }
 
-    fetchTodos();
+    // Обновляем список задач, учитывая удаляемую задачу
+    setTodos(prevTodos => {
+      // Фильтруем удаляемую задачу из списка, если она есть
+      const filteredTodos = prevTodos.filter(todo => 
+        !deletedTodo || todo.id !== deletedTodo.todo.id
+      );
+      // Добавляем новую задачу
+      return [...filteredTodos, data[0]];
+    });
+
     toast.success('Task created successfully!');
   };
 
@@ -197,19 +220,77 @@ const AppContent: React.FC = () => {
   };
 
   const deleteTodo = async (id: string) => {
-    const { error } = await supabase
-      .from('todos')
-      .delete()
-      .eq('id', id);
+    // Находим задачу, которую нужно удалить
+    const todoToDelete = todos.find(t => t.id === id);
+    if (!todoToDelete) return;
 
-    if (error) {
-      toast.error('Error deleting todo');
-      return;
+    // Если уже есть удаленная задача, очищаем ее состояние
+    if (deletedTodo) {
+      clearTimeout(deletedTodo.timeoutId);
+      try {
+        await supabase.from('todos').delete().eq('id', deletedTodo.todo.id);
+      } catch (error) {
+        console.error('Error deleting previous todo:', error);
+      }
     }
 
-    fetchTodos();
-    toast.success('Task deleted successfully!');
+    // Удаляем задачу из UI немедленно
+    setTodos(prevTodos => prevTodos.filter(t => t.id !== id));
+    setIsDeleting(true);
+
+    // Создаем новый таймаут для окончательного удаления
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const { error } = await supabase.from('todos').delete().eq('id', id);
+        if (error) {
+          throw error;
+        }
+      } catch (error) {
+        console.error('Error deleting todo:', error);
+        toast.error('Error deleting todo');
+        // Возвращаем задачу в список при ошибке
+        setTodos(prevTodos => [...prevTodos, todoToDelete]);
+      }
+      setDeletedTodo(null);
+      setIsDeleting(false);
+    }, 5000);
+
+    // Сохраняем информацию об удаленной задаче
+    setDeletedTodo({ todo: todoToDelete, timeoutId });
   };
+
+  const handleUndoDelete = () => {
+    if (!deletedTodo) return;
+
+    // Очищаем таймаут удаления
+    clearTimeout(deletedTodo.timeoutId);
+
+    // Возвращаем задачу в список
+    setTodos(prevTodos => [...prevTodos, deletedTodo.todo]);
+    
+    // Очищаем информацию об удаленной задаче
+    setDeletedTodo(null);
+    setIsDeleting(false);
+    
+    toast.success('Task restored successfully!');
+  };
+
+  const handleDeleteComplete = () => {
+    if (deletedTodo) {
+      clearTimeout(deletedTodo.timeoutId);
+    }
+    setDeletedTodo(null);
+    setIsDeleting(false);
+  };
+
+  // Очищаем таймаут при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      if (deletedTodo) {
+        clearTimeout(deletedTodo.timeoutId);
+      }
+    };
+  }, [deletedTodo]);
 
   const editTodo = async (id: string, title: string, description: string, imageUrl?: string) => {
     const { error } = await supabase
@@ -308,6 +389,7 @@ const AppContent: React.FC = () => {
               onToggle={toggleTodo}
               onDelete={deleteTodo}
               onEdit={editTodo}
+              isDeleting={isDeleting}
             />
           ))
         )}
@@ -328,6 +410,14 @@ const AppContent: React.FC = () => {
         onClose={() => setIsProductivityOpen(false)}
         data={productivityData}
       />
+
+      {deletedTodo && (
+        <UndoToast
+          onUndo={handleUndoDelete}
+          onComplete={handleDeleteComplete}
+          duration={5000}
+        />
+      )}
     </div>
   );
 };
