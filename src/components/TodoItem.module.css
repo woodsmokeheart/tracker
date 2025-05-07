@@ -76,12 +76,23 @@
   border-radius: 8px;
   overflow: hidden;
   position: relative;
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+.imageContainer:hover {
+  transform: scale(1.02);
 }
 
 .image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: filter 0.2s ease;
+}
+
+.imageContainer:hover .image {
+  filter: brightness(1.1);
 }
 
 .buttonContainer {

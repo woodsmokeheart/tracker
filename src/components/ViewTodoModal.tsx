@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaTimes, FaCheck } from 'react-icons/fa';
+import ImageLightbox from './ImageLightbox';
 import styles from './ViewTodoModal.module.css';
 
 interface ViewTodoModalProps {
@@ -14,7 +15,14 @@ interface ViewTodoModalProps {
 }
 
 const ViewTodoModal: React.FC<ViewTodoModalProps> = ({ isOpen, onClose, todo }) => {
+  const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsImageLightboxOpen(true);
+  };
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -38,6 +46,7 @@ const ViewTodoModal: React.FC<ViewTodoModalProps> = ({ isOpen, onClose, todo }) 
                 src={todo.imageUrl} 
                 alt="Task" 
                 className={styles.image}
+                onClick={handleImageClick}
                 onError={(e) => {
                   console.error('Failed to load image:', todo.imageUrl);
                   const img = e.currentTarget as HTMLImageElement;
@@ -52,6 +61,14 @@ const ViewTodoModal: React.FC<ViewTodoModalProps> = ({ isOpen, onClose, todo }) 
           )}
         </div>
       </div>
+
+      {todo.imageUrl && (
+        <ImageLightbox
+          isOpen={isImageLightboxOpen}
+          onClose={() => setIsImageLightboxOpen(false)}
+          imageUrl={todo.imageUrl}
+        />
+      )}
     </div>
   );
 };

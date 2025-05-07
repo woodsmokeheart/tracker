@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaEdit, FaTrash, FaCheck } from 'react-icons/fa';
 import ViewTodoModal from './ViewTodoModal';
+import ImageLightbox from './ImageLightbox';
 import styles from './TodoItem.module.css';
 
 interface TodoItemProps {
@@ -28,6 +29,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editDescription, setEditDescription] = useState(description);
   const [editImageUrl, setEditImageUrl] = useState(imageUrl);
@@ -46,6 +48,11 @@ const TodoItem: React.FC<TodoItemProps> = ({
       return;
     }
     setIsViewModalOpen(true);
+  };
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsImageLightboxOpen(true);
   };
 
   if (isEditing) {
@@ -72,6 +79,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
                 src={editImageUrl} 
                 alt="Task" 
                 className={styles.image}
+                onClick={handleImageClick}
                 onError={(e) => {
                   console.error('Failed to load edit image:', editImageUrl);
                   const img = e.currentTarget as HTMLImageElement;
@@ -131,6 +139,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
                   src={imageUrl} 
                   alt="Task" 
                   className={styles.image}
+                  onClick={handleImageClick}
                   onError={(e) => {
                     console.error('Failed to load image:', imageUrl);
                     const img = e.currentTarget as HTMLImageElement;
@@ -169,6 +178,14 @@ const TodoItem: React.FC<TodoItemProps> = ({
           imageUrl
         }}
       />
+
+      {imageUrl && (
+        <ImageLightbox
+          isOpen={isImageLightboxOpen}
+          onClose={() => setIsImageLightboxOpen(false)}
+          imageUrl={imageUrl}
+        />
+      )}
     </>
   );
 };
