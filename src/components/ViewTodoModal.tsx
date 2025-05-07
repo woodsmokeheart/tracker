@@ -20,12 +20,19 @@ const ViewTodoModal: React.FC<ViewTodoModalProps> = ({ isOpen, onClose, todo }) 
   if (!isOpen) return null;
 
   const handleImageClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setIsImageLightboxOpen(true);
   };
 
+  const handleModalClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div className={styles.modalOverlay} onClick={handleModalClick}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div className={styles.status}>
